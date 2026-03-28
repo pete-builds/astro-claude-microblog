@@ -1,0 +1,57 @@
+---
+import Markdown from './Markdown.astro';
+import { formatDate, slugifyTag } from '../utils/formatDate';
+
+interface Props {
+  post: any;
+  isPinned?: boolean;
+  showShareButton?: boolean;
+  siteUrl?: string;
+}
+
+const { post, isPinned = false, showShareButton = true, siteUrl = '' } = Astro.props;
+const date = new Date(post.data.date);
+const timeDisplay = formatDate(date);
+---
+
+<article id={post.id} class={`post ${isPinned ? 'post-pinned' : ''}`}>
+  <div class="post-header">
+    <img src="/images/avatar.svg" alt="" class="post-avatar" />
+    <div>
+      <span class="post-author">You</span>
+      <time datetime={date.toISOString()} class="post-date">{timeDisplay}</time>
+    </div>
+  </div>
+  <div class={`post-body ${post.data.text.length > 400 && !isPinned ? 'post-truncated' : ''}`}>
+    <div class="post-content">
+      <Markdown text={post.data.text} />
+    </div>
+    {post.data.text.length > 400 && !isPinned && (
+      <button class="expand-btn">Show more</button>
+    )}
+    {post.data.image && (
+      <img src={post.data.image} alt={post.data.imageAlt || 'Post image'} class="post-image" loading="lazy" />
+    )}
+    {post.data.link && (
+      <a href={post.data.link} class="post-link" target="_blank" rel="noopener">
+        {post.data.link.replace('https://', '')} ↗
+      </a>
+    )}
+  </div>
+  <div class="post-footer">
+    {post.data.tags && (
+      <div class="post-tags">
+        {post.data.tags.map((tag: string) => (
+          <a href={`/tag/${slugifyTag(tag)}/`} class="tag">{tag}</a>
+        ))}
+      </div>
+    )}
+    {showShareButton && !isPinned && (
+      <div class="post-actions">
+        <button class="share-btn" data-url={`${siteUrl}#${post.id}`} title="Copy link" aria-label="Copy link to post">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </button>
+      </div>
+    )}
+  </div>
+</article>

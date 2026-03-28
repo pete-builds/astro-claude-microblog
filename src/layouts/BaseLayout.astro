@@ -23,7 +23,7 @@ const {
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/images/avatar.svg" />
+    <!-- Replace with a 1200x630 PNG or JPG for social sharing -->
     <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
@@ -59,11 +59,7 @@ const {
     --transition: 0.2s ease;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -73,27 +69,10 @@ const {
     -webkit-font-smoothing: antialiased;
   }
 
-  a {
-    color: var(--orange);
-    text-decoration: none;
-    transition: color var(--transition);
-  }
+  a { color: var(--orange); text-decoration: none; transition: color var(--transition); }
+  a:hover { color: var(--orange-light); }
 
-  a:hover {
-    color: var(--orange-light);
-  }
-
-  .feed-container { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
-  .feed-header { padding-bottom: 2rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
-  .profile { display: flex; gap: 1.25rem; align-items: center; }
-  .avatar { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--border-color); object-fit: cover; }
-  .profile-info h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--orange), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .profile-bio { font-size: 0.95rem; color: var(--text-secondary); margin-top: 0.25rem; }
-  .profile-location { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
-  .profile-links { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
-  .social-link { color: var(--text-muted); transition: color 0.2s; }
-  .social-link:hover { color: var(--orange); }
-  .current-tag { color: var(--orange); font-weight: 600; }
+  /* Shared post styles */
   .feed { display: flex; flex-direction: column; }
   .post { padding: 1.5rem 0; border-bottom: 1px solid var(--border-color); }
   .post:last-child { border-bottom: none; }
@@ -120,6 +99,22 @@ const {
   .post-actions { display: flex; gap: 0.5rem; }
   .share-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 0.25rem; transition: color 0.2s; }
   .share-btn:hover { color: var(--orange); }
+  .post-truncated .post-content { max-height: 6.5em; overflow: hidden; position: relative; mask-image: linear-gradient(to bottom, black 60%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%); }
+  .expand-btn { background: none; border: none; color: var(--orange); font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0; margin-top: 0.25rem; transition: color 0.2s; }
+  .expand-btn:hover { color: var(--orange-light); }
+
+  /* Shared layout */
+  .feed-container { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
+  .feed-header { padding-bottom: 2rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; }
+  .profile { display: flex; gap: 1.25rem; align-items: center; }
+  .avatar { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--border-color); object-fit: cover; }
+  .profile-info h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--orange), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .profile-bio { font-size: 0.95rem; color: var(--text-secondary); margin-top: 0.25rem; }
+  .profile-location { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+  .profile-links { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+  .social-link { color: var(--text-muted); transition: color 0.2s; }
+  .social-link:hover { color: var(--orange); }
+  .current-tag { color: var(--orange); font-weight: 600; }
   .feed-footer { padding-top: 2rem; margin-top: 1rem; border-top: 1px solid var(--border-color); text-align: center; }
   .feed-footer p { font-size: 0.8rem; color: var(--text-muted); }
 

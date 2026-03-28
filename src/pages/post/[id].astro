@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Markdown from '../../components/Markdown.astro';
+import PostCard from '../../components/PostCard.astro';
+import { truncateTitle } from '../../utils/formatDate';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('posts');
@@ -12,50 +13,16 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const date = new Date(post.data.date);
-const y = date.getFullYear();
-const m = String(date.getMonth() + 1).padStart(2, '0');
-const d = String(date.getDate()).padStart(2, '0');
-const timeDisplay = `${y}.${m}.${d}`;
+const title = truncateTitle(post.data.text);
 ---
 
-<BaseLayout title={`${post.data.text.slice(0, 60)}... | The Stack`} description={post.data.text.slice(0, 160)}>
+<BaseLayout title={`${title} | The Stack`} description={post.data.text.slice(0, 160)}>
   <div class="feed-container">
     <header class="post-page-header">
       <a href="/" class="back-link">&larr; The Stack</a>
     </header>
 
-    <article class="post">
-      <div class="post-header">
-        <a href="/"><img src="/images/avatar.svg" alt="" class="post-avatar" /></a>
-        <div>
-          <span class="post-author">You</span>
-          <span class="post-date">{timeDisplay}</span>
-        </div>
-      </div>
-      <div class="post-body">
-        <div class="post-content">
-          <Markdown text={post.data.text} />
-        </div>
-        {post.data.image && (
-          <img src={post.data.image} alt="" class="post-image" loading="lazy" />
-        )}
-        {post.data.link && (
-          <a href={post.data.link} class="post-link" target="_blank" rel="noopener">
-            {post.data.link.replace('https://', '')} ↗
-          </a>
-        )}
-      </div>
-      <div class="post-footer">
-        {post.data.tags && (
-          <div class="post-tags">
-            {post.data.tags.map((tag: string) => (
-              <a href={`/tag/${tag.toLowerCase().replace(/\s+/g, '-')}/`} class="tag">{tag}</a>
-            ))}
-          </div>
-        )}
-      </div>
-    </article>
+    <PostCard post={post} showShareButton={false} />
 
     <footer class="feed-footer">
       <p>&copy; {new Date().getFullYear()} Your Name</p>
@@ -64,155 +31,10 @@ const timeDisplay = `${y}.${m}.${d}`;
 </BaseLayout>
 
 <style>
-  .feed-container {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-  }
-
-  .post-page-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .back-link {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .back-link:hover {
-    color: var(--orange);
-  }
-
-  .post {
-    padding: 1.5rem 0;
-  }
-
-  .post-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .post-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .post-author {
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: block;
-  }
-
-  .post-date {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
-
-  .post-body :global(.markdown-body p) {
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: var(--text-secondary);
-  }
-
-  .post-body :global(.markdown-body p + p) {
-    margin-top: 0.75rem;
-  }
-
-  .post-body :global(.markdown-body strong) {
-    color: var(--text-primary);
-    font-weight: 700;
-  }
-
-  .post-body :global(.markdown-body ol),
-  .post-body :global(.markdown-body ul) {
-    margin: 0.5rem 0 0.5rem 1.25rem;
-    font-size: 0.95rem;
-    line-height: 1.7;
-    color: var(--text-secondary);
-  }
-
-  .post-body :global(.markdown-body li + li) {
-    margin-top: 0.35rem;
-  }
-
-  .post-body :global(.markdown-body code) {
-    font-size: 0.85rem;
-    background: var(--bg-card);
-    padding: 0.1rem 0.35rem;
-    border-radius: 3px;
-    border: 1px solid var(--border-color);
-  }
-
-  .post-body :global(.markdown-body h4) {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-top: 1rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .post-image {
-    max-width: 280px;
-    height: auto;
-    border-radius: 8px;
-    margin-top: 0.75rem;
-    border: 1px solid var(--border-color);
-  }
-
-  .post-link {
-    display: inline-block;
-    margin-top: 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-  }
-
-  .post-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 0.75rem;
-  }
-
-  .post-tags {
-    display: flex;
-    gap: 0.4rem;
-  }
-
-  .tag {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    background: rgba(26, 111, 181, 0.12);
-    color: var(--blue-light);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-
-  .tag:hover {
-    background: rgba(26, 111, 181, 0.25);
-  }
-
-  .feed-footer {
-    padding-top: 2rem;
-    margin-top: 1rem;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-  }
-
-  .feed-footer p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
+  .feed-container { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
+  .post-page-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+  .back-link { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .back-link:hover { color: var(--orange); }
+  .feed-footer { padding-top: 2rem; margin-top: 1rem; border-top: 1px solid var(--border-color); text-align: center; }
+  .feed-footer p { font-size: 0.8rem; color: var(--text-muted); }
 </style>

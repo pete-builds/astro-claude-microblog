@@ -6,8 +6,7 @@ export async function GET() {
     .filter((post) => !post.data.tags?.includes('Pinned'))
     .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
-  // Replace these URLs with your own
-  const siteUrl = 'https://example.com';
+  const siteUrl = import.meta.env.SITE || 'https://example.com';
 
   const items = posts
     .map((post) => {
@@ -16,8 +15,8 @@ export async function GET() {
       <title>${post.data.tags?.join(', ') || 'Post'}</title>
       <description><![CDATA[${post.data.text}]]></description>
       <pubDate>${date.toUTCString()}</pubDate>
-      <link>${siteUrl}/</link>
-      <guid>${siteUrl}/#${post.id}</guid>
+      <link>${siteUrl}/post/${post.id}/</link>
+      <guid>${siteUrl}/post/${post.id}/</guid>
     </item>`;
     })
     .join('\n');
