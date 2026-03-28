@@ -1,0 +1,96 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Markdown from '../../components/Markdown.astro';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts');
+  const allTags = new Set<string>();
+  allPosts.forEach((post) => {
+    post.data.tags?.forEach((tag: string) => allTags.add(tag));
+  });
+
+  return Array.from(allTags).map((tag) => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') },
+    props: {
+      tag,
+      posts: allPosts
+        .filter((post) => post.data.tags?.includes(tag))
+        .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`${tag} | The Stack`} description={`Posts tagged ${tag}`}>
+  <div class="feed-container">
+    <header class="feed-header">
+      <div class="profile">
+        <img src="/images/avatar.svg" alt="Avatar" class="avatar" />
+        <div class="profile-info">
+          <h1>The Stack</h1>
+          <p class="profile-bio"><a href="/">All posts</a> / <span class="current-tag">{tag}</span> ({posts.length})</p>
+          <p class="profile-location">Your City, ST</p>
+          <div class="profile-links">
+            <a href="https://github.com/your-username" target="_blank" rel="noopener" class="social-link" title="GitHub">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="/rss.xml" class="social-link" title="RSS Feed">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.503 20.752c0 1.794-1.456 3.248-3.251 3.248-1.796 0-3.252-1.454-3.252-3.248 0-1.794 1.456-3.248 3.252-3.248 1.795 0 3.251 1.454 3.251 3.248zm-6.503-12.572v4.811c6.05.062 10.96 4.966 11.022 11.009h4.817c-.062-8.742-7.115-15.793-15.839-15.82zm0-8.18v4.819c12.951.115 23.424 10.574 23.5 23.501h4.5c-.076-15.673-12.792-28.365-28-28.32z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="feed">
+      {posts.map((post) => {
+        const date = new Date(post.data.date);
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const timeDisplay = `${y}.${m}.${d}`;
+
+        const isPinned = post.data.tags?.includes('Pinned');
+
+        return (
+          <article id={post.id} class={`post ${isPinned ? 'post-pinned' : ''}`}>
+            <div class="post-header">
+              <img src="/images/avatar.svg" alt="" class="post-avatar" />
+              <div>
+                <span class="post-author">You</span>
+                <span class="post-date">{timeDisplay}</span>
+              </div>
+            </div>
+            <div class="post-body">
+              <Markdown text={post.data.text} />
+              {post.data.image && (
+                <img src={post.data.image} alt="" class="post-image" loading="lazy" />
+              )}
+              {post.data.link && (
+                <a href={post.data.link} class="post-link" target="_blank" rel="noopener">
+                  {post.data.link.replace('https://', '')} ↗
+                </a>
+              )}
+            </div>
+            <div class="post-footer">
+              {post.data.tags && (
+                <div class="post-tags">
+                  {post.data.tags.map((t: string) => (
+                    <a href={`/tag/${t.toLowerCase().replace(/\s+/g, '-')}/`} class="tag">{t}</a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <footer class="feed-footer">
+      <p>&copy; {new Date().getFullYear()} Your Name</p>
+    </footer>
+  </div>
+</BaseLayout>
