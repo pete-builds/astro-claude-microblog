@@ -38,6 +38,11 @@ const {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <nav class="site-nav">
+      <a href="/feed/" class="nav-link">Build Log</a>
+      <span class="nav-sep">/</span>
+      <a href="/" class="nav-link">CV</a>
+    </nav>
     <slot />
   </body>
 </html>
@@ -68,6 +73,11 @@ const {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
+
+  .site-nav { display: flex; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem 0; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.03em; }
+  .nav-link { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .nav-link:hover { color: var(--orange); }
+  .nav-sep { color: var(--border-color); }
 
   a { color: var(--orange); text-decoration: none; transition: color var(--transition); }
   a:hover { color: var(--orange-light); }

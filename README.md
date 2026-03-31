@@ -8,6 +8,9 @@ A microblog you publish from [Claude Code](https://claude.ai/claude-code) with a
 
 ## Features
 
+- **CV/showcase page** as the landing page (`/`) with project cards, agent roster, and techniques
+- **Build log** at `/feed/` with paginated posts
+- **Site-wide navigation** (Build Log / CV)
 - Dark theme with orange/blue accent gradient
 - Tag filtering with counts
 - RSS feed
@@ -34,16 +37,27 @@ Open `http://localhost:4321` to see the template.
 
 ## Customize Your Site
 
-### Profile and branding
+### CV page (landing page)
 
-Edit `src/pages/[...page].astro`:
-- Replace `Your Name` with your name
-- Replace `yoursite.com` with your domain
-- Update the bio text and skill pills
-- Update social links (GitHub, LinkedIn, email)
-- Replace `Your City, ST` with your location
+Edit `src/pages/index.astro`:
+- Replace the placeholder name, title, and social links in the hero
+- Replace the example projects, agents, apps, and techniques with your own
+- Update the intro text to describe your workflow
+- The data arrays at the top of the file make it easy to add/remove cards
 
-Also update these in `src/pages/tag/[tag].astro` and `src/pages/post/[id].astro`.
+### Build log (feed)
+
+Edit `src/pages/feed/[...page].astro`:
+- Update the footer copyright name
+- The subtitle text under "Build Log"
+
+### Navigation
+
+The nav ("Build Log / CV") is in `src/layouts/BaseLayout.astro`. Update the labels or add more links there.
+
+### Profile pages
+
+Also update your name in `src/pages/tag/[tag].astro` and `src/pages/post/[id].astro`.
 
 ### Avatar
 
@@ -262,14 +276,20 @@ Use sequential numbering: `001-short-slug.md`, `002-another-post.md`. The slug b
 │   └── robots.txt            # Search engine directives
 ├── src/
 │   ├── components/
-│   │   └── Markdown.astro    # Markdown renderer
+│   │   ├── Markdown.astro    # Markdown renderer
+│   │   └── PostCard.astro    # Reusable post card
 │   ├── layouts/
-│   │   └── BaseLayout.astro  # Global styles and head
+│   │   └── BaseLayout.astro  # Global styles, head, and nav
 │   ├── pages/
-│   │   ├── [...page].astro   # Main feed (paginated)
+│   │   ├── index.astro       # CV/showcase landing page
+│   │   ├── cv.astro          # Redirect /cv/ to /
+│   │   ├── feed/
+│   │   │   └── [...page].astro  # Build log (paginated)
 │   │   ├── post/[id].astro   # Individual post pages
 │   │   ├── tag/[tag].astro   # Tag filter pages
 │   │   └── rss.xml.ts        # RSS feed generator
+│   ├── utils/
+│   │   └── formatDate.ts     # Date and tag utilities
 │   └── content/
 │       └── posts/            # Your markdown posts
 └── .claude/
