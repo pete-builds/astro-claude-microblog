@@ -7,12 +7,59 @@ interface Props {
 
 const { text } = Astro.props;
 
+// Schemes a link or image is allowed to use. Anything else is dropped rather
+// than rendered, because `marked` has no built-in sanitiser and Astro's
+// `set:html` does not restrict URL schemes.
+const SAFE_SCHEMES = ['http:', 'https:', 'mailto:'];
+
+function safeHref(href: string | null | undefined): string | null {
+  if (!href) return null;
+  const raw = href.trim();
+  // Protocol-relative (//host) and root/relative links carry no scheme and are
+  // fine. Anything with a scheme has to be on the allowlist.
+  if (raw.startsWith('/') || raw.startsWith('#') || raw.startsWith('?')) return raw;
+  try {
+    // Resolved against a dummy base so relative hrefs parse without throwing.
+    const parsed = new URL(raw, 'https://example.invalid/');
+    return SAFE_SCHEMES.includes(parsed.protocol) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
 marked.use({
   renderer: {
+    // Raw HTML in a post is escaped. This half already worked.
     html(token) {
       return token.text
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
+    },
+
+    // Markdown's OWN link syntax never passed through the html() renderer above,
+    // so `[text](javascript:...)`, autolinks, mixed-case variants and
+    // reference-style links all emitted a live javascript: anchor. marked
+    // dropped its built-in sanitiser years ago and does not filter hrefs.
+    //
+    // Severity is low here -- this is a single-author microblog with no comment
+    // system, no external feed and no third-party contributor, so a hostile link
+    // is one Pete pasted himself. It is fixed because the escaping *looked*
+    // complete and was not, and because this renderer is a byte-identical copy of
+    // the one in the public astro-claude-microblog template, where other people
+    // build on it.
+    link({ href, title, text }) {
+      const safe = safeHref(href);
+      const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+      if (safe === null) return text;   // drop the link, keep the words
+      return `<a href="${safe.replace(/"/g, '&quot;')}"${titleAttr}>${text}</a>`;
+    },
+
+    image({ href, title, text }) {
+      const safe = safeHref(href);
+      const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : '';
+      const altAttr = ` alt="${(text ?? '').replace(/"/g, '&quot;')}"`;
+      if (safe === null) return text ?? '';
+      return `<img src="${safe.replace(/"/g, '&quot;')}"${altAttr}${titleAttr} />`;
     },
   },
 });
